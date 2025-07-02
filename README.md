@@ -54,7 +54,9 @@ It does not support:
 
 - Types
 
-    There is no type information. All matching is string-based.
+    There is no type information. All matching is string-based. There are no
+    operators for comparing numbers, dates or ranges (but they could be added
+    without too much work).
 
 - Complex logic
 
@@ -98,6 +100,100 @@ Return all objects which pass all query assertions in `$q`.
 
 Optional export which provides a more procedural interface
 to [the constructor](#new) of this package.
+
+## Query syntax
+
+The query language is specified in a [Pegex](https://metacpan.org/pod/Pegex) grammar called `query-tags`
+which is included in the distribution's `share` directory. See that file
+for detailed technical information. What follows is an overview of the
+language.
+
+- Query
+
+    A `query` is represented by a [Query::Tags::To::AST::Query](https://metacpan.org/pod/Query%3A%3ATags%3A%3ATo%3A%3AAST#Query::Tags::To::AST::Query)
+    object. It contains a list of assertions in the form of `pairs`.
+
+- Pair
+
+    A `pair` consists of a _key_ and a _value_. Keys are alphanumeric strings
+    (beginning with an alphabetic character) also permitting the punctuation
+    characters `.`, `-` and `_`. The value can be a `quoted string`, a `regex`
+    or a `junction`. A pair starts with a colon `:` and the value is written
+    directly after the key. E.g., `:key'value'` (for a string value),
+    `:key/value/` (for a regex value) or `:key&<value1 value2>` (for a
+    junction value). The value is optional.
+
+- Quoted string
+
+    A `quoted string` is a string delimited by single quotes `'`.
+    E.g., `'Perl'` but **not** `Perl` or `"Perl"` or `«Perl»`.
+
+- Regex
+
+    A `regex` is a standard Perl regex, as usual between a pair of slahes `/`
+    but not allowing modifiers. E.g., `/Perl/` or `/(?i)Perl/` but **not**
+    `/Perl/i`.
+
+- Junction
+
+    A `junction` is a superposition of several values together with a _mode_.
+    The mode can be `&` (meaning the object should match _all_ of the given
+    values), `|` (the object should match _at least one_ of the given values)
+    and `!` (the object should match _none_ of the given values). The list
+    of values is given in angular backets `< ... >` and is whitespace-separated.
+    It can contain (and freely mix) quoted strings, regexes, junctions and barewords.
+    A junction can also be negated by prefixing its mode with a tilde `~`.
+    E.g., `&</Perl/ /Master/>` (both match) or `|</Perl/ /Raku/>`
+    (at least one matches) or `~&</AI/ /.*coin/ /as a service/>` (not all match).
+
+- Bareword
+
+    All of the above constructs start with a non-alphabetical character:
+    `:` for pairs, `'` for quoted strings, `/` for regexes and `&`,
+    `|`, `!` or `~` for junctions. Hence, single word strings do not
+    actually have to be written in quotes as they can be distinguished
+    from non-strings. A `bareword` is a string of `\w` characters,
+    `\d` numbers or the punctuation characters `.`, `-` or `_`.
+    It is internally converted to a string. Barewords can appear in
+    junctions as well as the top-level query. At the top level, they are
+    converted to pairs with **no key** and with the bareword as a string
+    value. It is up to the application to decide what to do with them.
+
+# EXAMPLES
+
+## Searching a small database
+
+Get all books (co-)authored by `/foy/`:
+
+    use Modern::Perl;
+    use Query::Tags qw(parse_query);
+
+    my @books = (
+        { title => 'Programming Perl', authors => 'Tom Christiansen, brian d foy, Larry Wall, Jon Orwant' },
+        { title => 'Learning Perl', authors => 'Randal L. Schwartz, Tom Phoenix, brian d foy' },
+        { title => 'Intermediate Perl', authors => 'Randal L. Schwartz and brian d foy, with Tom Phoenix' },
+        { title => 'Mastering Perl', authors => 'brian d foy' },
+        { title => 'Perl Best Practices', authors => 'Damian Conway' },
+        { title => 'Higher-Order Perl', authors => 'Mark-Jason Dominus' },
+        { title => 'Object Oriented Perl', authors => 'Damian Conway' },
+        { title => 'Modern Perl', authors => 'chromatic' }
+    );
+
+    say $_->{title} for parse_query(q[:authors/foy/])->select(@books);
+
+## Email headers
+
+Find all work emails from a mailing list that mention `/seminar/` or `/talk/`:
+
+    use v5.16;
+    use Mail::Header;
+    use Path::Tiny;
+    use Query::Tags qw(parse_query);
+
+    my @mail = map { Mail::Header->new([$_->lines]) } path('~/Mail/work/cur')->children;
+    my @headers = map { my $mh = $_; +{ map { fc $_ => $mh->get($_) } $mh->tags } } @mail;
+    say $_->{subject} for
+        parse_query(q[:list-id :subject|</(?i)seminar/ /(?i)talk/>])->select(@headers);
 
 # AUTHOR
 

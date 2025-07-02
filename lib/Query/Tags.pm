@@ -66,7 +66,9 @@ There is no way to match values inside a list, for example.
 
 =item Types
 
-There is no type information. All matching is string-based.
+There is no type information. All matching is string-based. There are no
+operators for comparing numbers, dates or ranges (but they could be added
+without too much work).
 
 =item Complex logic
 
@@ -225,8 +227,11 @@ value. It is up to the application to decide what to do with them.
 
 =head1 EXAMPLES
 
-=head2 Books
+=head2 Searching a small database
 
+Get all books (co-)authored by C</foy/>:
+
+    use Modern::Perl;
     use Query::Tags qw(parse_query);
 
     my @books = (
@@ -240,7 +245,21 @@ value. It is up to the application to decide what to do with them.
         { title => 'Modern Perl', authors => 'chromatic' }
     );
 
-    say $_->{title} for parse_query(q[])->select(@books);
+    say $_->{title} for parse_query(q[:authors/foy/])->select(@books);
+
+=head2 Email headers
+
+Find all work emails from a mailing list that mention C</seminar/> or C</talk/>:
+
+    use v5.16;
+    use Mail::Header;
+    use Path::Tiny;
+    use Query::Tags qw(parse_query);
+
+    my @mail = map { Mail::Header->new([$_->lines]) } path('~/Mail/work/cur')->children;
+    my @headers = map { my $mh = $_; +{ map { fc $_ => $mh->get($_) } $mh->tags } } @mail;
+    say $_->{subject} for
+        parse_query(q[:list-id :subject|</(?i)seminar/ /(?i)talk/>])->select(@headers);
 
 =cut
 
