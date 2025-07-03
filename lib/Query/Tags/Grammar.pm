@@ -1,5 +1,6 @@
 package Query::Tags::Grammar;
 
+use strict;
 use base 'Pegex::Grammar';
 use constant file => './share/query-tags.pgx';
 

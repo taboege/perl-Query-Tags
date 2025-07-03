@@ -1,4 +1,4 @@
-requires 'ExtUtils::MakeMaker', '>= 6.17';
+requires 'ExtUtils::MakeMaker', '>= 6.48';
 
 requires 'Pegex';
 
