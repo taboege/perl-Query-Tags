@@ -6,7 +6,9 @@ Query::Tags::To::AST - Build AST from Query
 
 =cut
 
-use Modern::Perl 2018;
+use v5.16;
+use strict;
+use warnings;
 
 =head1 DESCRIPTION
 

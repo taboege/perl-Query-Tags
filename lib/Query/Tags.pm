@@ -80,7 +80,9 @@ you I<cannot> specify "all books whose title is X or whose author is Y".
 
 =cut
 
-use Modern::Perl 2018;
+use v5.16;
+use strict;
+use warnings;
 
 use Pegex;
 use Query::Tags::Grammar;

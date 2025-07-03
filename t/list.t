@@ -1,5 +1,4 @@
-use Modern::Perl 2018;
-
+use v5.16;
 use Test::More;
 use Scalar::Util qw(blessed);
 use Pegex;
