@@ -14,11 +14,11 @@ Query::Tags - Raku-inspired query language for attributes
 
 =head2 VERSION
 
-This document describes v0.0.1 of Query::Tags.
+This document describes v0.0.2 of Query::Tags.
 
 =cut
 
-package Query::Tags v0.0.1;
+package Query::Tags v0.0.2;
 
 =head1 DESCRIPTION
 
@@ -95,20 +95,38 @@ our @EXPORT_OK = qw(parse_query);
 
 =head3 new
 
-    my $q = Query::Tags->new($query_string);
+    my $q = Query::Tags->new($query_string, \%opts);
 
 Parses the query string and creates a new query object.
 The query is internally represented by a syntax tree.
 
+The optional argument C<\%opts> is a hashref containing
+options. Only one option is supported at the moment:
+
+=over
+
+=item B<default_key>
+
+Controls the matching of assertions in the query for
+pairs with an empty I<key> part. If the given value is
+a CODEREF, it is invoked with each tested object together
+with the I<value> part of an assertion (and the C<\%opts>
+hashref unaltered). It should return a truthy or falsy
+value depending on match. If the B<default_key> value
+is not a CODEREF it is assumed to be a string and is
+used instead of any missing I<key> in an assertion.
+
+=back
+
 =cut
 
 sub new {
-    my ($class, $query) = @_;
+    my ($class, $query, $opts) = @_;
     my $root = Pegex::Parser->new(
         grammar  => Query::Tags::Grammar->new,
         receiver => Query::Tags::To::AST->new,
     )->parse($query);
-    bless { query => $query, tree => $root }, $class
+    bless { query => $query, tree => $root, opts => $opts // +{ } }, $class
 }
 
 =head3 tree
@@ -134,7 +152,7 @@ Check if the given object passes all query assertions in C<$q>.
 
 sub test {
     my ($self, $obj) = @_;
-    $self->{tree}->test($obj)
+    $self->{tree}->test($obj, $self->{opts})
 }
 
 =head3 select
@@ -146,8 +164,9 @@ Return all objects which pass all query assertions in C<$q>.
 =cut
 
 sub select {
-    my $tree = shift->{tree};
-    grep { $tree->test($_) } @_
+    my $self = shift;
+    my $tree = $self->{tree};
+    grep { $tree->test($_, $self->{opts}) } @_
 }
 
 =head2 Exports

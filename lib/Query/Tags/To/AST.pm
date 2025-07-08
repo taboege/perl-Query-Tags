@@ -38,7 +38,7 @@ Return the list of assertions.
 
 =head3 test
 
-    $query->test($x) ? 'PASS' : 'FAIL'
+    $query->test($x, \%opts) ? 'PASS' : 'FAIL'
 
 Check if C<$x> passes all assertions.
 
@@ -55,8 +55,8 @@ package Query::Tags::To::AST::Query {
     sub pairs { @{+shift} }
 
     sub test {
-        my ($self, $arg) = @_;
-        all { $_->test($arg) } @$self
+        my ($self, $arg, $opts) = @_;
+        all { $_->test($arg, $opts) } @$self
     }
 }
 
@@ -85,13 +85,18 @@ Return the value (another C<Query::Tags::To::AST::*> object).
 
 =head3 test
 
-    $pair->test($x) ? 'PASS' : 'FAIL'
+    $pair->test($x, \%opts) ? 'PASS' : 'FAIL'
 
 Check if C<$x> matches the pair. This means the following:
 if C<$x> is a blessed object and it has a method named C<$key>,
 then it is invoked and its return value tested against C<$value>.
 Otherwise, if C<$x> is a hashref, the C<$key> is looked up
 and its value is used. Otherwise the test fails.
+
+If C<$key> is undefined, the C<default_key> is looked up in
+the options hashref C<\%opts>. See L<Query::Tags/"test"> for
+an explanation of its behavior. If both C<$key> and C<default_key>
+are undefined, the match fails.
 
 If C<$value> is C<undef>, then only existence of the method
 or the hash key is required and its value is ignored.
@@ -113,8 +118,16 @@ package Query::Tags::To::AST::Pair {
     sub value { shift->[1] }
 
     sub test {
-        my ($self, $arg) = @_;
+        my ($self, $arg, $opts) = @_;
         my ($key, $value) = @$self;
+
+        if (not defined $key) {
+            $key = $opts->{default_key};
+            return 0 if not defined $key;
+            if (ref($key) and reftype($key) eq 'CODE') {
+                return $key->($arg, $value, $opts);
+            }
+        }
 
         if (blessed($arg) and $arg->can($key)) {
             return 1 if not defined $value;

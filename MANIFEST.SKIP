@@ -1,0 +1,10 @@
+pm_to_blib
+TODO
+.tar.gz$
+.bak$
+.SKIP$
+.old$
+^.git/
+^blib/
+^xt/
+^cover_db/

@@ -12,7 +12,7 @@ Query::Tags - Raku-inspired query language for attributes
 
 ## VERSION
 
-This document describes v0.0.1 of Query::Tags.
+This document describes v0.0.2 of Query::Tags.
 
 # DESCRIPTION
 
@@ -68,10 +68,24 @@ It does not support:
 
 ### new
 
-    my $q = Query::Tags->new($query_string);
+    my $q = Query::Tags->new($query_string, \%opts);
 
 Parses the query string and creates a new query object.
 The query is internally represented by a syntax tree.
+
+The optional argument `\%opts` is a hashref containing
+options. Only one option is supported at the moment:
+
+- **default\_key**
+
+    Controls the matching of assertions in the query for
+    pairs with an empty _key_ part. If the given value is
+    a CODEREF, it is invoked with each tested object together
+    with the _value_ part of an assertion (and the `\%opts`
+    hashref unaltered). It should return a truthy or falsy
+    value depending on match. If the **default\_key** value
+    is not a CODEREF it is assumed to be a string and is
+    used instead of any missing _key_ in an assertion.
 
 ### tree
 
