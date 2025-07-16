@@ -33,6 +33,7 @@ package Tester {
 my $obj = bless $h, 'Tester';
 ok  p(q[:xuz] => $obj);
 ok  p(q[:xuf] => $obj);
+ok !p(q[:xuf''] => $obj);
 ok  p(q[:xug/^str$/] => $obj);
 
 done_testing;

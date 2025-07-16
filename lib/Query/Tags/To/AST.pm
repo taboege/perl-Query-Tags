@@ -131,10 +131,12 @@ package Query::Tags::To::AST::Pair {
 
         if (blessed($arg) and $arg->can($key)) {
             return 1 if not defined $value;
+            return 0 if not defined $arg->$key;
             return $value->test($arg->$key);
         }
         elsif (reftype($arg) eq 'HASH') {
             return exists $arg->{$key} if not defined $value;
+            return 0 if not defined $arg->{$key};
             return $value->test($arg->{$key});
         }
         return 0;
