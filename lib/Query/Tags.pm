@@ -14,11 +14,11 @@ Query::Tags - Raku-inspired query language for attributes
 
 =head2 VERSION
 
-This document describes v0.0.2 of Query::Tags.
+This document describes v0.0.3 of Query::Tags.
 
 =cut
 
-package Query::Tags v0.0.2;
+package Query::Tags v0.0.3;
 
 =head1 DESCRIPTION
 

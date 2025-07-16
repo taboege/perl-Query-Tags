@@ -12,7 +12,7 @@ Query::Tags - Raku-inspired query language for attributes
 
 ## VERSION
 
-This document describes v0.0.2 of Query::Tags.
+This document describes v0.0.3 of Query::Tags.
 
 # DESCRIPTION
 
