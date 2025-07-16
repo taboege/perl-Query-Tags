@@ -208,6 +208,9 @@ directly after the key. E.g., C<:key'value'> (for a string value),
 C<:key/value/> (for a regex value) or C<< :key&<value1 value2> >> (for a
 junction value). The value is optional.
 
+If instead of a value, the question mark character C<?> appears, the
+I<key> field must exist and its value must be truthy.
+
 =item Quoted string
 
 A C<quoted string> is a string delimited by single quotes C<'>.

@@ -137,6 +137,9 @@ language.
     `:key/value/` (for a regex value) or `:key&<value1 value2>` (for a
     junction value). The value is optional.
 
+    If instead of a value, the question mark character `?` appears, the
+    _key_ field must exist and its value must be truthy.
+
 - Quoted string
 
     A `quoted string` is a string delimited by single quotes `'`.
