@@ -26,11 +26,13 @@ ok !p(q[:xuf] => $h);
 
 package Tester {
     sub xuf { undef }
+    sub xug { 'str' }
 };
 
 # Blessed objects
 my $obj = bless $h, 'Tester';
 ok  p(q[:xuz] => $obj);
 ok  p(q[:xuf] => $obj);
+ok  p(q[:xug/^str$/] => $obj);
 
 done_testing;
